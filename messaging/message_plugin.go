@@ -1,4 +1,4 @@
-package main
+package messaging
 
 type MessageHandlerPlugin interface {
 	Handle() error

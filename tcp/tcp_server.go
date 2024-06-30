@@ -5,6 +5,8 @@ import (
 	"log"
 	"net"
 	"strconv"
+
+	"github.com/mateun/network_dispo/messaging"
 )
 
 var number_of_connections int = 0
@@ -18,7 +20,7 @@ func decrement_connections() {
 	number_of_connections--
 }
 
-func tcp_handler(conn net.Conn) {
+func tcp_handler(conn net.Conn, handler messaging.MessageHandlerPlugin) {
 	reader := bufio.NewReader(conn)
 
 	for {
@@ -29,6 +31,8 @@ func tcp_handler(conn net.Conn) {
 			decrement_connections()
 			return
 		}
+
+		handler.Handle()
 
 		switch messageType {
 		case 1:
@@ -47,7 +51,7 @@ func tcp_handler(conn net.Conn) {
 
 }
 
-func Start_tcp_server(port int) {
+func Start_tcp_server(port int, handler messaging.MessageHandlerPlugin) {
 	log.Println("network tiger starting")
 
 	l, err := net.Listen("tcp", ":"+strconv.Itoa(port))
@@ -72,6 +76,6 @@ func Start_tcp_server(port int) {
 			log.Fatal(err)
 		}
 
-		go tcp_handler(conn)
+		go tcp_handler(conn, handler)
 	}
 }
