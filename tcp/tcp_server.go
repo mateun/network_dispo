@@ -2,7 +2,6 @@ package tcp
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -11,8 +10,12 @@ import (
 var number_of_connections int = 0
 
 func check_connection_limit() bool {
-	fmt.Printf("number of conns: %d\n", number_of_connections)
+	log.Printf("number of conns: %d\n", number_of_connections)
 	return number_of_connections < 2
+}
+
+func decrement_connections() {
+	number_of_connections--
 }
 
 func tcp_handler(conn net.Conn) {
@@ -21,20 +24,21 @@ func tcp_handler(conn net.Conn) {
 	for {
 		// Read the first byte to determine message type
 		messageType, err := reader.ReadByte()
-
 		if err != nil {
-			log.Fatal(err)
+			log.Println("received error while reading, regarding client as disconnected. ", err)
+			decrement_connections()
+			return
 		}
 
 		switch messageType {
 		case 1:
-			fmt.Println("msg type 1 found!")
+			log.Println("msg type 1 found!")
 		case 2:
-			fmt.Println("msg type 2 found!")
+			log.Println("msg type 2 found!")
 		default:
-			fmt.Println("unkown message!")
+			log.Println("unkown message!")
 			conn.Close()
-			number_of_connections--
+			decrement_connections()
 			return
 
 		}
@@ -44,7 +48,7 @@ func tcp_handler(conn net.Conn) {
 }
 
 func Start_tcp_server(port int) {
-	fmt.Println("network tiger starting")
+	log.Println("network tiger starting")
 
 	l, err := net.Listen("tcp", ":"+strconv.Itoa(port))
 	if err != nil {
@@ -56,10 +60,12 @@ func Start_tcp_server(port int) {
 		number_of_connections += 1
 
 		if check_connection_limit() {
-			fmt.Println("connection accepted")
+			log.Println("connection accepted")
 		} else {
-			fmt.Println("connection refused, above allowed limit")
+			log.Println("connection refused, above allowed limit")
+			decrement_connections()
 			conn.Close()
+			continue
 		}
 
 		if err != nil {

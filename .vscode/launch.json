@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Start Network Tiger",
+            "name": "Start Network Dispo",
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${fileDirname}/../main.go"
+            "program": "${fileDirname}/../server_tester.go"
         }
     ]
 }
